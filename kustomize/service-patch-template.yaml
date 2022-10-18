@@ -1,0 +1,9 @@
+- op: replace
+  path: /metadata/name
+  value: SERVICE_NAME
+- op: replace
+  path: /metadata/namespace
+  value: NAMESPACE
+- op: replace
+  path: /spec/selector/app
+  value: SERVICE_NAME

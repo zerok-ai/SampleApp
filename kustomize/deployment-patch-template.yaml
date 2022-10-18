@@ -1,0 +1,29 @@
+- op: replace
+  path: /metadata/name
+  value: SERVICE_NAME-deployment
+- op: replace
+  path: /metadata/namespace
+  value: NAMESPACE
+- op: replace
+  path: /metadata/labels/app
+  value: SERVICE_NAME
+- op: replace
+  path: /spec/replicas
+  value: REPLICA_COUNT
+- op: replace
+  path: /spec/selector/matchLabels/app
+  value: SERVICE_NAME
+- op: add
+  path: /spec/template/metadata/labels/app
+  value: SERVICE_NAME
+- op: add
+  path: /spec/template/spec/containers/0/env
+  value: 
+    - name: NAME
+      value: SERVICE_NAME
+    - name: TARGETS
+      value: 'TARGETS_VALUE'
+    - name: LATENCY_MIN
+      value: 'LATENCY_MIN_VALUE'
+    - name: LATENCY_MAX
+      value: 'LATENCY_MAX_VALUE'
