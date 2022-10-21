@@ -2,7 +2,6 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: loadrun-deployment
-  namespace: external
   labels:
     app: loadrun
 spec:
