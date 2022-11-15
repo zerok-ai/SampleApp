@@ -20,7 +20,7 @@ spec:
         image:  alpine/curl
         # Just spin & wait forever
         command: [ "sh", "-c", "--" ]
-        args: [ "while true; do sleep 1; curl http://service1.default.svc.cluster.local; done;" ]
+        args: [ "while true; do sleep 0.5; curl -IL http://service.default.svc.cluster.local -s | egrep -e zerok -e HTTP | xargs; done;" ]
         resources: 
           limits:
             cpu: "2"
