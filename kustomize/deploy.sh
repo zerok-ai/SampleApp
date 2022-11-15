@@ -15,12 +15,12 @@ while getopts "h:r:t:n:k:l:s:" arg; do
       echo "h - This help"
       echo "r - replica count"
       echo "t - Targets"
-      echo "n - Name"
+      echo "n - Namespace"
       echo "k - min latency"
       echo "l - max latenct"
-      echo "s - namespace"
+      echo "s - Service Name"
       ;;
-    n)
+    s)
       SERVICE_NAME=$OPTARG
       if [ -z "$SERVICE_NAME" ]
       then
@@ -45,7 +45,7 @@ while getopts "h:r:t:n:k:l:s:" arg; do
       REPLICA_COUNT="${OPTARG:-$REPLICA_COUNT}"
       echo "Replicas : $REPLICA_COUNT"
       ;;
-    s)
+    n)
       NAMESPACE="${OPTARG:-$NAMESPACE}"
       echo "Namespace : $NAMESPACE"
       ;;
