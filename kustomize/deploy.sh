@@ -8,17 +8,15 @@ LATENCY_MAX_VALUE=1
 NAMESPACE=default
 
 echo ""
-while getopts "h:r:t:n:k:l:s:" arg; do
+while getopts "h:r:n:f:s:" arg; do
   case $arg in
     h)
       echo "usage" 
       echo "h - This help"
-      echo "r - replica count"
-      echo "t - Targets"
       echo "n - Namespace"
-      echo "k - min latency"
-      echo "l - max latenct"
       echo "s - Service Name"
+      echo "r - Replica count"
+      echo "f - Configuration file"
       ;;
     s)
       SERVICE_NAME=$OPTARG
@@ -29,18 +27,6 @@ while getopts "h:r:t:n:k:l:s:" arg; do
       fi
       echo "Name : $SERVICE_NAME"
       ;;
-    k)
-      LATENCY_MIN_VALUE="${OPTARG:-$LATENCY_MIN_VALUE}"
-      echo "Min Latency : $LATENCY_MIN_VALUE"
-      ;;
-    l)
-      LATENCY_MAX_VALUE="${OPTARG:-$LATENCY_MAX_VALUE}"
-      echo "Max Latency : $LATENCY_MAX_VALUE"
-      ;;
-    t)
-      TARGETS_VALUE="${OPTARG:-$TARGETS_VALUE}"
-      echo "Target : $TARGETS_VALUE"
-      ;;
     r)
       REPLICA_COUNT="${OPTARG:-$REPLICA_COUNT}"
       echo "Replicas : $REPLICA_COUNT"
@@ -48,6 +34,15 @@ while getopts "h:r:t:n:k:l:s:" arg; do
     n)
       NAMESPACE="${OPTARG:-$NAMESPACE}"
       echo "Namespace : $NAMESPACE"
+      ;;
+    f)
+      CONF_FILE=$OPTARG
+      if [ -z "$CONF_FILE" ]
+      then
+        echo "Service config is required"
+        exit 1
+      fi
+      echo "Configs : $CONF_FILE"
       ;;
   esac
 done
@@ -59,11 +54,13 @@ function createPatch {
 
     sed -i "" "s/REPLICA_COUNT/$REPLICA_COUNT/g" $patchItem-patch.yaml
     sed -i "" "s/SERVICE_NAME/$SERVICE_NAME/g" $patchItem-patch.yaml
-    sed -i "" "s/TARGETS_VALUE/$TARGETS_VALUE/g" $patchItem-patch.yaml
-    sed -i "" "s/LATENCY_MIN_VALUE/$LATENCY_MIN_VALUE/g" $patchItem-patch.yaml
-    sed -i "" "s/LATENCY_MAX_VALUE/$LATENCY_MAX_VALUE/g" $patchItem-patch.yaml
     sed -i "" "s/NAMESPACE/$NAMESPACE/g" $patchItem-patch.yaml
+
 }
+
+# handle CONF_FILE.
+kubectl delete configmap -n $NAMESPACE $SERVICE_NAME-config
+kubectl create configmap -n $NAMESPACE $SERVICE_NAME-config --from-file=$CONF_FILE
 
 createPatch deployment
 createPatch service

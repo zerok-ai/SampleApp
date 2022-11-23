@@ -1,0 +1,95 @@
+kind: Configuration
+spec:
+  latency_min: 0
+  latency_max: 0
+  port: 80
+  name: service1
+  zipkin: "http://zipkin.istio-system.svc.cluster.local:9411/api/v1/spans"
+
+
+---
+
+kind: Connection
+metadata: 
+  name: mysqlConn
+  kind: mysql
+spec:
+  username: root
+  password: password
+  db: mysql
+  host: "host.minikube.internal"
+  port: 3306
+ 
+---
+
+kind: APIs
+metadata:
+  prefix: ""
+spec:
+  - path: "/"
+    response: 
+      status: 200
+      headers: 
+        from: svc1
+      data: 'Success'
+      statusText: 'OK'
+
+  - path: "/api"
+    dependents: 
+      - path: "service2.default.svc.cluster.local/"
+      - path: "service3.default.svc.cluster.local/"
+    scripts:
+      onRequest: |-
+        let dependents = apiSpec.dependents;
+        dependents.forEach((dep)=>{
+          if(!dep.path.includes('chakko'))
+            dep.path=dep.path+"?q=chakko"
+        });
+      onResponse: |-
+        function getData(dep) {
+          return dep.response.data+'1';
+        }
+        apiSpec.dependents.forEach(dep=>dep.response.data+=getData(dep));
+    response: 
+      status: 200
+      headers: 
+        from: svc1
+      json: |
+        {
+          "response1": "${apiSpec.dependents[0].response.data}",
+          "response2": "${apiSpec.dependents[1].response.data}"
+        }
+  
+  - path: "/times"
+    dependents: 
+      - path: "service2.default.svc.cluster.local/time"
+      - path: "service3.default.svc.cluster.local/time"
+      - path: "service2.default.svc.cluster.local/dbtime"
+    response: 
+      status: 200
+      headers: 
+        from: svc1
+      json: |
+        {
+          "service1_time": "${new Date()}",
+          "service2_time": "${apiSpec.dependents[0].response.data.time}",
+          "service3_time": "${apiSpec.dependents[1].response.data.time}",
+          "DB_time": "${apiSpec.dependents[2].response.data.time}"
+        }
+
+  - path: "/mysql"
+    dependents: 
+      - kind: Connection
+        name: mysqlConn
+        query: "SELECT CURDATE();"
+      - path: "service3.default.svc.cluster.local/"
+    response: 
+      status: 200
+      headers: 
+        from: svc1
+      json: |
+        {
+          "time": "${apiSpec.dependents[0].response[0]['CURDATE()']}",
+          "svc3_res": "${apiSpec.dependents[1].response.data}"
+        }
+

@@ -1,0 +1,64 @@
+kind: Configuration
+spec:
+  latency_min: 0
+  latency_max: 0
+  port: 80
+  name: service2
+  zipkin: "http://zipkin.istio-system.svc.cluster.local:9411/api/v1/spans"
+  # prometheus: 
+
+---
+
+kind: Connection
+metadata: 
+  name: mysqlConn
+  kind: mysql
+spec:
+  username: root
+  password: password
+  db: mysql
+  host: "host.minikube.internal"
+  port: 3306
+ 
+---
+
+kind: APIs
+metadata:
+  prefix: ""
+spec:
+  - path: "/"
+    response: 
+      status: 200
+      headers: 
+        from: svc2
+      data: 'Success'
+      statusText: 'OK'
+
+  - path: "/dbtime"
+    dependents: 
+      - kind: Connection
+        name: mysqlConn
+        query: "SELECT CURDATE();"
+    scripts:
+      onResponse: |-
+        apiSpec.dependents.forEach(dep=>console.log(dep.response));
+    response: 
+      status: 200
+      headers: 
+        from: svc2
+      json: |
+        {
+          "time": "${apiSpec.dependents[0].response[0]['CURDATE()']}"
+        }
+
+  - path: "/time"
+    response: 
+      status: 200
+      headers: 
+        from: svc2
+      json: |
+        {
+          "time": "${new Date()}"
+        }
+
+        

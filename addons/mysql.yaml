@@ -1,0 +1,72 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mysql-server
+  labels:
+     app: mysqldb
+spec:
+  selector:
+    matchLabels:
+      app: mysqldb
+      tier: db
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: mysqldb
+        tier: db
+    spec:
+      containers:
+        - image: mysql:5.6
+          name: mysql
+          resources: 
+            limits:
+              cpu: "2"
+              memory: 1Gi
+            requests:
+              cpu: 10m
+              memory: 40Mi
+          env:
+            - name: MYSQL_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mysql-pass
+                  key: password
+              ports:
+                - containerPort: 3306
+                  name: mysql
+              volumeMounts:
+                - name: mysql-pv
+                  mountPath: /var/lib/mysql
+    volumes:
+      - name: mysql-pv
+        persistentVolumeClaim:
+          claimName: mysql-pvc
+---
+
+apiVersion: storage.k8s.io/v1beta1
+kind: StorageClass
+metadata:
+  name: mysql-sc
+provisioner: csi.trident.netapp.io
+reclaimPolicy: Retain
+mountOptions:
+  - debug
+parameters:
+  backendType:ontap-nas
+
+---
+
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: mysql-pvc
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 100Gi
+  storageClassName: mysql-sc
+

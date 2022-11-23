@@ -1,0 +1,45 @@
+kind: Configuration
+spec:
+  latency_min: 0
+  latency_max: 0
+  port: 80
+  name: service3
+  zipkin: "http://zipkin.istio-system.svc.cluster.local:9411/api/v1/spans"
+  # prometheus: 
+
+# ---
+
+# kind: Connection
+# metadata: 
+#   name: mongoConn
+#   kind: mongo
+# spec:
+#   host: "mongo.default.svc.cluster.local"
+#   port: 27017
+
+---
+
+kind: APIs
+metadata:
+  prefix: ""
+spec:
+  - path: "/"
+    response: 
+      status: 200
+      headers: 
+        from: svc3
+      data: 'Success'
+      statusText: 'OK'
+
+  - path: "/time"
+    response: 
+      status: 200
+      headers: 
+        from: svc3
+      json: |
+        {
+          "time": "${new Date()}"
+        }
+
+
+        

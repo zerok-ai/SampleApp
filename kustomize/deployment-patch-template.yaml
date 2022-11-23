@@ -17,13 +17,19 @@
   path: /spec/template/metadata/labels/app
   value: SERVICE_NAME
 - op: add
-  path: /spec/template/spec/containers/0/env
+  path: /spec/template/spec/containers/0/volumeMounts
   value: 
-    - name: NAME
-      value: SERVICE_NAME
-    - name: TARGETS
-      value: 'TARGETS_VALUE'
-    - name: LATENCY_MIN
-      value: 'LATENCY_MIN_VALUE'
-    - name: LATENCY_MAX
-      value: 'LATENCY_MAX_VALUE'
+    - name: SERVICE_NAME-volume
+      mountPath: /usr/src/app/configuration/
+- op: add
+  path: /spec/template/spec/containers/0/env
+  value:
+    - name: CONF_FILE
+      value: /usr/src/app/configuration/SERVICE_NAME-definition.yaml
+- op: add
+  path: /spec/template/spec/volumes
+  value: 
+    - name: SERVICE_NAME-volume
+      configMap: 
+        name: SERVICE_NAME-config
+
