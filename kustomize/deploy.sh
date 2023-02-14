@@ -8,7 +8,7 @@ LATENCY_MAX_VALUE=1
 NAMESPACE=default
 
 echo ""
-while getopts "h:r:n:f:s:" arg; do
+while getopts "h:r:n:f:s:i:" arg; do
   case $arg in
     h)
       echo "usage" 
@@ -26,6 +26,15 @@ while getopts "h:r:n:f:s:" arg; do
         exit 1
       fi
       echo "Name : $SERVICE_NAME"
+      ;;
+    i)
+      DOCKER_IMAGE=$OPTARG
+      if [ -z "$DOCKER_IMAGE" ]
+      then
+        echo "Image can not be empty"
+        exit 1
+      fi
+      echo "Image : $DOCKER_IMAGE"
       ;;
     r)
       REPLICA_COUNT="${OPTARG:-$REPLICA_COUNT}"
@@ -55,6 +64,7 @@ function createPatch {
     sed -i "" "s/REPLICA_COUNT/$REPLICA_COUNT/g" $patchItem-patch.yaml
     sed -i "" "s/SERVICE_NAME/$SERVICE_NAME/g" $patchItem-patch.yaml
     sed -i "" "s/NAMESPACE/$NAMESPACE/g" $patchItem-patch.yaml
+    sed -i "" "s|DOCKER_IMAGE|$DOCKER_IMAGE|g" $patchItem-patch.yaml
 
 }
 

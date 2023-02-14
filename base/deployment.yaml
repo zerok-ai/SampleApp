@@ -16,8 +16,8 @@ spec:
     spec:
       containers:
       - name: service
-        image: shivamnagar/echo-relay:nightly
-        imagePullPolicy: IfNotPresent
+        image: DOCKER_IMAGE
+        imagePullPolicy: Always
         ports:
         - containerPort: 80
         resources: 

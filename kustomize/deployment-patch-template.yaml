@@ -16,6 +16,9 @@
 - op: add
   path: /spec/template/metadata/labels/app
   value: SERVICE_NAME
+- op: replace
+  path: /spec/template/spec/containers/0/image
+  value: DOCKER_IMAGE
 - op: add
   path: /spec/template/spec/containers/0/volumeMounts
   value: 
