@@ -74,7 +74,7 @@ spec:
           "service1_time": "${new Date()}",
           "service2_time": "${apiSpec.dependents[0].response.json.time}",
           "service3_time": "${apiSpec.dependents[1].response.json.time}",
-          "DB_time": "${apiSpec.dependents[2].response.data.time}"
+          "DB_time": "${apiSpec.dependents[2].response.json.time}"
         }
 
   - path: "/mysql"
